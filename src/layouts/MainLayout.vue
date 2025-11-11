@@ -12,10 +12,10 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Ticker by Pedro
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>v0.1</div>
       </q-toolbar>
     </q-header>
 
@@ -28,14 +28,13 @@
         <q-item-label
           header
         >
-          Essential Links
+          Menú
         </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+        <q-separator class="q-ma-xs"></q-separator>
+        <SimpleItem v-for="link in menu" :key="link.title" v-bind="link" />
+        <q-separator class="q-ma-xs"></q-separator>
+
       </q-list>
     </q-drawer>
 
@@ -47,52 +46,21 @@
 
 <script setup>
 import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import SimpleItem from 'components/SimpleItem.vue'
 
-const linksList = [
+const menu = ref([
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
+    title: 'Metrónomo',
     icon: 'school',
-    link: 'https://quasar.dev'
+    link: '/home'
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+    title: 'Canciones',
+    icon: 'school',
+    link: '/songs'
   },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
+])
+
 
 const leftDrawerOpen = ref(false)
 

@@ -1,78 +1,55 @@
 <template>
   <q-page class="q-container">
-    <div class="row text-h4 q-pa-xl">
-      Metrónomo
+    <div class="row q-pa-lg">
+    <song-card :song="song" :clickable="false" :accel="accel"/>
     </div>
-    <div class="row flex flex-center q-pa-lg">
-      <div class="col-auto">
-        <q-btn dense icon="remove" @click="lessBPC"></q-btn>
+    <div class="row justify-center q-px-xl q-pt-md q-pb-xl">
+      Aceleración (en BPM)
       </div>
-      <div class="col-auto q-px-lg text-h6">
-        {{ bpc }}
-        </div>
+    <div class="row items-center q-px-xl">
       <div class="col-auto">
-        <q-btn dense icon="add" @click="moreBPC"></q-btn>
-      </div>
-      <div class="col-12 text-center q-pb-sm text-h6">Beats por compás</div>
-    </div>
-    <div class="row items-center q-pa-lg">
-      <div class="col-12 text-center q-pb-sm text-h6 text-green">{{speed}}</div>
-      <div class="col-auto">
-        <q-btn dense icon="remove" @click="slowDown"></q-btn>
+        <q-btn icon="remove" @click="slowDown"></q-btn>
       </div>
       <div class="col q-px-lg">
-        <q-slider size="lg"
-        class="my-slider"
-        :min="10"
-      :max="240"
-      track-size="6px"
-      label-size="20px"
+        <q-slider type="slider" :min="-30"
+      :max="30"
+      label-always
       color="green"
-      v-model="speed" />
+      v-model="accel" />
       </div>
       <div class="col-auto">
-        <q-btn dense icon="add" @click="speedUp"></q-btn>
+        <q-btn icon="add" @click="speedUp"></q-btn>
       </div>
-      <div class="col-12 text-center q-pb-sm text-h6">Beats por minuto</div>
     </div>
 <div class="row flex flex-center">
-  <q-btn dense round size="lg" :color="playPauseColor" :icon="playPause" @click="startStopMetronome"></q-btn>
+  <q-btn :icon="playPause" @click="startStopMetronome"></q-btn>
 </div>
   </q-page>
 </template>
 
 <script setup>
+import SongCard from 'src/components/SongCard.vue'
 import { useInterval } from 'quasar';
 import { computed, ref, watch } from 'vue';
- const { registerInterval, removeInterval } = useInterval();
+const { registerInterval, removeInterval } = useInterval();
 
-const speed=ref(90)
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
+const song = JSON.parse(route.query.data);
+
+const accel=ref(0)
 const slowDown = () => {
-  if (speed.value > 10)
-    speed.value --
+  accel.value --
 }
 const speedUp = () => {
-  if (speed.value < 240)
-    speed.value ++
-}
-const bpc=ref(4)
-const lessBPC = () => {
-  if (bpc.value > 1)
-    bpc.value --
-}
-const moreBPC = () => {
-  bpc.value ++
+  accel.value ++
 }
 const playing = ref(false)
 const playPause = computed (() => {
   if (!playing.value)
     return 'play_arrow'
-  return 'pause'
-})
-const playPauseColor = computed (() => {
-  if (!playing.value)
-    return 'green'
-  return 'red'
+  return 'stop'
 })
 
 const startStopMetronome = (() =>{
@@ -84,28 +61,63 @@ let audioContext = null;
 let oscillator = null;
 
 // Function to start the metronome
-const startMetronome = ()=> {
+const startMetronome = async () => {
     if(playing.value) return
 
     playing.value = true;
-    const intervalMs = (60 / Number(speed.value)) * 1000; // Calculate interval in milliseconds
-    playClick(1);
-    let counter=0;
-    // registerInterval(playClick, intervalMs);
-    registerInterval(() => {
+    for(let i=0; i<song.blocks.length ; i++) {
+      await playBlock(song.blocks[i])
+      console.log(playing.value)
+      if (!playing.value) {
+        stopMetronome()
+        // removeInterval()
+        return
+      }
+    }
+    stopMetronome()
+    // playing.value=false
+
+}
+
+async function playBlock(block) {
+      const intervalMs = (60 / Math.max(block.speed+accel.value,1)) * 1000; // Calculate interval in milliseconds
+
+      // const promise = new Promise((resolve)=>{
+      //   setTimeout(() => {
+      //     resolve('done')
+      //   }, block.repeat*intervalMs)
+      // })
+
+      playClick(1);
+
+      let counter = 1
+      const promise = new Promise((resolve) => {
+        registerInterval(() => {
         counter++
-       if (counter == bpc.value) {
-          playClick(1)
-          counter = 0;
+        if (!playing.value) {
+          // removeInterval()
+          resolve('done')
+        }
+        if (counter > block.repeat*block.bpc) {
+          removeInterval()
+          resolve('done')
         } else {
-          playClick(0)
+          console.log(counter % block.bpc)
+          if (counter % block.bpc == 1)
+            playClick(1)
+          else
+            playClick(0)
+          console.log(block.id, counter)
         }
       }, intervalMs)
+    })
+
+        await promise
 }
 
 // Function to stop the metronome
 function stopMetronome() {
-    if (!playing.value) return;
+    // if (!playing.value) return;
     removeInterval();
     playing.value = false;
 
@@ -144,17 +156,7 @@ const playClick = (n=0) => {
     oscillator.stop(audioContext.currentTime + 0.02); // Sound duration
 }//
 
-watch(speed, () => {
-  if (playing.value) {
+watch(accel, () => {
     stopMetronome()
-    startMetronome()
-  }
 })
 </script>
-
-<style scoped>
-.my-slider .q-slider__pin-value {
-  font-size: 5rem; /* Adjust as needed */
-  font-weight: bold;
-}
-</style>

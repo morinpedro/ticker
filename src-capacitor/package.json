@@ -1,0 +1,12 @@
+{
+  "name": "ticker",
+  "version": "0.0.1",
+  "description": "A versatile metronome by Pedro",
+  "author": "Pedro Morin <morinpedro@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  }
+}

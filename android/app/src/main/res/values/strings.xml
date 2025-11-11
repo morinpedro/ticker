@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">pedro.ticker</string>
+    <string name="title_activity_main">pedro.ticker</string>
+    <string name="package_name">ar.net.simpleapps</string>
+    <string name="custom_url_scheme">ar.net.simpleapps</string>
+</resources>
