@@ -22,7 +22,7 @@
                   </q-input>
                 </div>
                 <div class="col-2 q-pr-sm"><br />
-                  <span v-if="accel !== 0" class="q-pl-sm">({{ Math.max(block.speed + accel, 1)
+                  <span v-if="accel !== 0" class="q-pl-sm">({{ Math.max(Number(block.speed) + Number(accel), 1)
                   }})</span>
                 </div>
                 <div class="col-2">
