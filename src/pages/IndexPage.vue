@@ -148,7 +148,13 @@ const playClick = (n = 0) => {
 watch(speed, () => {
   if (playing.value) {
     stopMetronome()
-    startMetronome()
+    // startMetronome()
+  }
+})
+watch(bpc, () => {
+  if (playing.value) {
+    stopMetronome()
+    // startMetronome()
   }
 })
 </script>

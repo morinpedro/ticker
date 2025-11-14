@@ -22,7 +22,7 @@
                   </q-input>
                 </div>
                 <div class="col-2 q-pr-sm"><br />
-                  <span v-if="accel !== 0" class="q-pl-sm">({{ Math.max(Number(block.speed) + Number(accel), 1)
+                  <span v-if="accel !== 0" class="q-pl-sm">({{ formatNice(Math.max(Number(block.speed)*accelFactor, 1))
                   }})</span>
                 </div>
                 <div class="col-2">
@@ -51,22 +51,25 @@
             </q-form>
           </q-card>
         </div>
-        <div class="row justify-center q-px-xl q-pt-md q-pb-xl">
-          Aceleración (en BPM)
+        <div class="row justify-center q-px-xl q-pt-md">
+          Aceleración
+        </div>
+        <div class="row justify-center text-h6 text-green q-px-xl ">
+          {{accel}} %
         </div>
         <div class="row items-center q-px-xl">
           <div class="col-auto">
-            <q-btn icon="remove" @click="slowDown"></q-btn>
+            <q-btn dense icon="remove" @click="slowDown"></q-btn>
           </div>
           <div class="col q-px-lg">
-            <q-slider :min="-30" :max="30" label-always color="green" v-model="accel" />
+            <q-slider :min="-50" :max="50" :int="1" color="green" v-model="accel" />
           </div>
           <div class="col-auto">
-            <q-btn icon="add" @click="speedUp"></q-btn>
+            <q-btn dense icon="add" @click="speedUp"></q-btn>
           </div>
         </div>
         <div class="row flex flex-center">
-          <q-btn :icon="playPause" @click="startStopMetronome"></q-btn>
+           <q-btn dense round size="lg" :color="playPauseColor" :icon="playPause" @click="startStopMetronome"></q-btn>
         </div>
       </div>
       <div class="col-0 col-sm-1 col-md-2"></div>
@@ -167,7 +170,7 @@ const startMetronome = async () => {
 }
 
 async function playBlock (block) {
-  const intervalMs = (60 / Math.max(Number(block.speed) + accel.value, 1)) * 1000; // Calculate interval in milliseconds
+  const intervalMs = (60 / Math.max(Number(block.speed) * accelFactor.value, 1)) * 1000; // Calculate interval in milliseconds
 
   // const promise = new Promise((resolve)=>{
   //   setTimeout(() => {
@@ -294,12 +297,30 @@ const addBlock = () => {
   }
 }
 
+const playPauseColor = computed(() => {
+  if (!playing.value)
+    return 'green'
+  return 'red'
+})
+
+
+const accelFactor = computed(() => {
+  return Number(accel.value)/100+1
+})
 const someChanges = computed(() => {
   return JSON.stringify(song.value)!==JSON.stringify(songCopy.value)
 })
 
+const formatNice = (n) => {
+  return Math.round(n*10)/10
+}
+
 watch(accel, () => {
   stopMetronome()
 })
+watch(editing, () => {
+  stopMetronome()
+})
+
 
 </script>
